@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multitasking Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://4pl67mv56j.execute-api.ap-northeast-2.amazonaws.com">
+<link rel="stylesheet" href="https://4pl67mv56j.execute-api.ap-northeast-2.amazonaws.com/v1/api/css/drop_fontstream_css/?sid=gAAAAABpEtwWUmmMvQ93GGgVQi72HQ36TJMa9UETk_SqQIehtEZfz63ied3JUsZNRZKc_FflOdVbbbeRMTv7DPO4Kh4KFXxwdDyYlq4rxojd8vJIenL8HYjy52u6bL6a3kNDVqlRczbErQLyZmxmV3vFxO2PW5Ysb0p1tzGdvVBEyecC4h1RLmf4DwjASDMfotfjWZ90wEjXYBHFDLApPsHvfIOcblQhtEGLNjpLuF7JnYdrfOgus9a_USxRF5gaLJRTonv343Rh" charset="utf-8" referrerpolicy="origin"></link>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 메인 화면 -->
+    <div class="main-screen" id="mainContainer">
+        <button class="start-btn" onclick="enterGames()">업무 시작
+        </button>
+    </div>
+
+    <!-- 게임들이 쌓여있는 영역 (처음에는 숨김) -->
+    <div class="games-wrapper" id="gamesWrapper" style="display: none;">
+        <!-- 게임 1 -->
+        <div class="game-layer" id="game1">
+            <div class="game-window" id="gameWindow1">
+                <div class="window-header" id="windowHeader1">
+                    <span class="window-title">TASK 1 메일 보내기</span>
+                    <span class="task-complete" id="taskComplete" style="display: none;">업무완료</span>
+                </div>
+                <div class="window-content">
+                    <div class="game-area" id="gameArea">
+                        <div class="email-form">
+                            <div class="email-header">
+                                <div class="email-fields">
+                                    <div class="email-field">
+                                        <label>To</label>
+                                        <input type="text" id="emailTo" placeholder="">
+                                    </div>
+                                    <div class="email-field">
+                                        <label>Subject</label>
+                                        <input type="text" id="emailSubject" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="email-options">
+                                    <span class="cc-bcc">Cc Bcc</span>
+                                </div>
+                            </div>
+                            <div class="email-body">
+                                <textarea id="emailBody" placeholder=""></textarea>
+                            </div>
+                            <div class="email-footer">
+                                <button class="send-btn" onclick="sendEmail()">Send</button>
+                                <div class="email-actions">
+                                    <button class="action-icon" title="삭제">🗑️</button>
+                                    <button class="action-icon" title="더보기">⋮</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 알림 창 (게임 설명) -->
+        <div class="info-panel" id="infoPanel">
+            <div class="info-header">
+                <span class="info-title">NOTIFICATION 1</span>
+                <button class="minimize-btn" onclick="toggleInfoPanel()">_</button>
+            </div>
+            <div class="info-content" id="infoContent">
+                <p>원문을 참고하여 메일을 정확하게 입력하고 보내기 버튼을 누르세요.</p>
+                <a href="#" class="view-original" onclick="openOriginalModal(event)">[원문보기]</a>
+            </div>
+        </div>
+        
+        
+        <!-- 나중에 게임 2, 3... 여기에 추가 -->
+    </div>
+
+    <script src="game1.js"></script>
+    <script>
+        function enterGames() {
+            // 메인 화면 숨기기
+            document.getElementById('mainContainer').style.display = 'none';
+            // 게임 영역 보이기
+            document.getElementById('gamesWrapper').style.display = 'block';
+        }
+        
+        function closeInfoPanel() {
+            document.getElementById('infoPanel').style.display = 'none';
+        }
+        
+        function toggleInfoPanel() {
+            const panel = document.getElementById('infoPanel');
+            const content = document.getElementById('infoContent');
+            
+            if (panel.classList.contains('minimized')) {
+                // 확장
+                panel.classList.remove('minimized');
+                content.style.display = 'block';
+            } else {
+                // 축소
+                panel.classList.add('minimized');
+                content.style.display = 'none';
+            }
+        }
+        
+        function toggleWindowCollapse() {
+            const gameWindow = document.getElementById('gameWindow1');
+            const windowContent = gameWindow.querySelector('.window-content');
+            
+            if (gameWindow.classList.contains('collapsed')) {
+                // 펼치기
+                windowContent.style.display = 'flex';
+                gameWindow.style.height = '400px';
+                gameWindow.classList.remove('collapsed');
+            } else {
+                // 접기
+                windowContent.style.display = 'none';
+                gameWindow.style.height = 'auto';
+                gameWindow.classList.add('collapsed');
+            }
+        }
+        
+        function sendEmail() {
+            const to = document.getElementById('emailTo').value.trim();
+            const subject = document.getElementById('emailSubject').value.trim();
+            const body = document.getElementById('emailBody').value;
+            
+            if (!to || !subject || !body.trim()) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            // 정답 (원문 내용)
+            const correctTo = 'example@email.com';
+            const correctSubject = '회의 안내';
+            const correctBody = '안녕하세요, 디자인 검토 미팅이 12월 8일(월) 오후 2시에 예정되어 있습니다. 회의 장소는 회의실 B-2이며, 주요 안건은 신규 랜딩 페이지 인터랙션 방향 검토입니다. 참석 부탁드립니다. 감사합니다.';
+            
+            // 본문 비교 함수 (줄바꿈 제거 및 공백 정규화)
+            function normalizeText(text) {
+                return text
+                    .replace(/\r\n/g, ' ')  // Windows 줄바꿈을 공백으로
+                    .replace(/\r/g, ' ')    // Mac 줄바꿈을 공백으로
+                    .replace(/\n/g, ' ')    // Unix 줄바꿈을 공백으로
+                    .replace(/[ \t]+/g, ' ')  // 여러 공백을 하나로
+                    .trim();
+            }
+            
+            // 오타 검사
+            const isToCorrect = to === correctTo;
+            const isSubjectCorrect = subject === correctSubject;
+            const isBodyCorrect = normalizeText(body) === normalizeText(correctBody);
+            
+            if (isToCorrect && isSubjectCorrect && isBodyCorrect) {
+                alert('메일 보내기 성공');
+                
+                // 윈도우를 헤더만 남기고 접기
+                const gameWindow = document.getElementById('gameWindow1');
+                const windowContent = gameWindow.querySelector('.window-content');
+                const taskComplete = document.getElementById('taskComplete');
+                
+                windowContent.style.display = 'none';
+                gameWindow.style.height = 'auto';
+                gameWindow.classList.add('collapsed');
+                taskComplete.style.display = 'block';
+                
+                // 헤더 클릭 시 다시 펼치기
+                const windowHeader = document.getElementById('windowHeader1');
+                windowHeader.onclick = function(e) {
+                    // 드래그 중이 아닐 때만 펼치기
+                    if (!windowHeader.classList.contains('dragging')) {
+                        toggleWindowCollapse();
+                    }
+                };
+            } else {
+                alert('오타가 있습니다. 다시 전송하세요.');
+            }
+        }
+        
+        function openOriginalModal(e) {
+            e.preventDefault();
+            // 원문 내용을 여기에 작성하세요
+            const originalText = `받는 사람: example@email.com
+제목: 회의 안내
+
+안녕하세요,
+디자인 검토 미팅이 12월 8일(월) 오후 2시에 예정되어 있습니다.
+회의 장소는 회의실 B-2이며,
+주요 안건은 신규 랜딩 페이지 인터랙션 방향 검토입니다. 참석 부탁드립니다.
+감사합니다.`;
+            
+            const popup = window.open('', '원문보기', 'width=600,height=500,scrollbars=yes,resizable=yes');
+            
+            if (popup) {
+                // HTML 특수문자 이스케이프
+                const escapedText = originalText
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+                
+                popup.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="ko">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>원문</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
+                            body {
+                                font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+                                background: #e2ff6e;
+                                padding: 20px;
+                            }
+                            .popup-content {
+                                background: #e2ff6e;
+                                padding: 20px;
+                                max-width: 100%;
+                                line-height: 1.6;
+                                color: black;
+                            }
+                            .popup-content p {
+                                white-space: pre-wrap;
+                                margin: 0;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="popup-content">
+                            <p>${escapedText}</p>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                popup.document.close();
+            }
+        }
+    </script>
+</body>
+</html>
